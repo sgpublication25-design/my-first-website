@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Word | Professional PDF Tools Suite</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .convert-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .tool-description {
+            color: #6c757d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .drop-zone {
+            border: 3px dashed #bdc3c7;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            background-color: #fafbfc;
+            cursor: pointer;
+        }
+        
+        .drop-zone.highlight {
+            border-color: #3498db;
+            background-color: #ebf5fb;
+            transform: scale(1.02);
+        }
+        
+        .browse-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .format-options {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #9b59b6;
+        }
+        
+        .format-options label {
+            display: block;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .action-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PROFESSIONAL PDF TOOLS SUITE</h1>
+            <p class="subtitle">Enterprise-Grade • 100% Stable • High Performance • No Dependencies</p>
+        </header>
+
+        <div class="dashboard">
+            <nav class="sidebar">
+                <h3>Dashboard</h3>
+                <ul>
+                    <li><a href="dashboard.html">Basic Tools</a></li>
+                    <li><a href="merge.html">PDF Merger</a></li>
+                    <li><a href="split.html">PDF Splitter</a></li>
+                    <li><a href="convert.html" class="nav-active">PDF to Word</a></li>
+                    <li><a href="#">Editing</a></li>
+                    <li><a href="#">Security</a></li>
+                    <li><a href="#">Batch Processing</a></li>
+                </ul>
+            </nav>
+
+            <div class="content">
+                <div class="convert-container">
+                    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+                    <h1>PDF to Word Converter</h1>
+                    <p class="tool-description">Convert PDF documents to editable Word files with high accuracy.</p>
+
+                    <div id="dropZone" class="drop-zone">
+                        <p>📁 Drag & Drop your PDF file here</p>
+                        <p><strong>or</strong></p>
+                        <button class="browse-btn" onclick="document.getElementById('fileInput').click()">Select PDF File</button>
+                        <input type="file" id="fileInput" accept=".pdf">
+                        <p class="file-info">Supported: PDF files only • Max 10MB</p>
+                    </div>
+
+                    <div class="format-options">
+                        <h3>Conversion Options</h3>
+                        <label>
+                            <input type="radio" name="format" value="docx" checked> 
+                            Microsoft Word (.docx) - Recommended
+                        </label>
+                        <label>
+                            <input type="radio" name="format" value="doc"> 
+                            Word 97-2003 (.doc)
+                        </label>
+                    </div>
+
+                    <button id="convertButton" class="action-button" disabled>Convert to Word</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="convert-script.js"></script>
+</body>
+</html>

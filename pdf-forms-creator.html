@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced PDF Forms Creator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .header h1 i {
+            margin-right: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background-color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .elements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .element-item {
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .element-item:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .element-item i {
+            color: #4b6cb7;
+            width: 20px;
+        }
+
+        .property-group {
+            margin-bottom: 15px;
+        }
+
+        .property-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .property-group input,
+        .property-group textarea,
+        .property-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .property-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Workspace Styles */
+        .workspace {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f0f2f5;
+        }
+
+        .form-canvas {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            min-height: 100%;
+            padding: 30px;
+            position: relative;
+        }
+
+        .canvas-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #canvas-title {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        #canvas-description {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .drop-zone {
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drop-zone.active {
+            border-color: #3498db;
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .drop-zone i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+
+        /* Form Element Styles */
+        .form-element {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background-color: white;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .form-element:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-element.selected {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+
+        .form-element .element-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: none;
+        }
+
+        .form-element:hover .element-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .control-btn {
+            width: 25px;
+            height: 25px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            color: white;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Properties Panel Styles */
+        .properties-panel {
+            width: 300px;
+            background-color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .properties-panel h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 30px 0;
+        }
+
+        .no-selection i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+
+        .property-control {
+            margin-bottom: 15px;
+        }
+
+        .property-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .property-control input,
+        .property-control textarea,
+        .property-control select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .close:hover {
+            color: #2c3e50;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar, .properties-panel {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar, .properties-panel {
+                width: 100%;
+                max-height: 200px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-file-pdf"></i> Advanced PDF Forms Creator</h1>
+            <div class="header-actions">
+                <button id="preview-btn" class="btn btn-secondary">
+                    <i class="fas fa-eye"></i> Preview
+                </button>
+                <button id="save-btn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Form
+                </button>
+                <button id="export-btn" class="btn btn-success">
+                    <i class="fas fa-file-export"></i> Export PDF
+                </button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>Form Elements</h3>
+                <div class="elements-list">
+                    <div class="element-item" data-type="text">
+                        <i class="fas fa-font"></i> Text Field
+                    </div>
+                    <div class="element-item" data-type="textarea">
+                        <i class="fas fa-align-left"></i> Text Area
+                    </div>
+                    <div class="element-item" data-type="checkbox">
+                        <i class="fas fa-check-square"></i> Checkbox
+                    </div>
+                    <div class="element-item" data-type="radio">
+                        <i class="fas fa-dot-circle"></i> Radio Button
+                    </div>
+                    <div class="element-item" data-type="select">
+                        <i class="fas fa-caret-down"></i> Dropdown
+                    </div>
+                    <div class="element-item" data-type="date">
+                        <i class="fas fa-calendar-alt"></i> Date Picker
+                    </div>
+                    <div class="element-item" data-type="file">
+                        <i class="fas fa-file-upload"></i> File Upload
+                    </div>
+                    <div class="element-item" data-type="button">
+                        <i class="fas fa-hand-pointer"></i> Button
+                    </div>
+                    <div class="element-item" data-type="label">
+                        <i class="fas fa-heading"></i> Label
+                    </div>
+                </div>
+                
+                <div class="form-properties">
+                    <h3>Form Properties</h3>
+                    <div class="property-group">
+                        <label for="form-title">Form Title</label>
+                        <input type="text" id="form-title" placeholder="Enter form title">
+                    </div>
+                    <div class="property-group">
+                        <label for="form-description">Description</label>
+                        <textarea id="form-description" placeholder="Enter form description"></textarea>
+                    </div>
+                    <div class="property-group">
+                        <label for="form-theme">Theme</label>
+                        <select id="form-theme">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="blue">Blue</option>
+                            <option value="green">Green</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workspace">
+                <div class="form-canvas" id="form-canvas">
+                    <div class="canvas-header">
+                        <h2 id="canvas-title">Untitled Form</h2>
+                        <p id="canvas-description">Add a description for your form</p>
+                    </div>
+                    <div class="drop-zone" id="drop-zone">
+                        <i class="fas fa-plus-circle"></i>
+                        <p>Drag form elements here or click on elements in the sidebar</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="properties-panel">
+                <h3>Element Properties</h3>
+                <div id="properties-content">
+                    <div class="no-selection">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Select an element to edit its properties</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Form Preview</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="preview-content">
+                <!-- Preview content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let formElements = [];
+        let selectedElement = null;
+        let elementCounter = 0;
+
+        // DOM elements
+        const dropZone = document.getElementById('drop-zone');
+        const formCanvas = document.getElementById('form-canvas');
+        const propertiesContent = document.getElementById('properties-content');
+        const previewModal = document.getElementById('preview-modal');
+        const previewContent = document.getElementById('preview-content');
+        const closeModal = document.querySelector('.close');
+        const previewBtn = document.getElementById('preview-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const formTitle = document.getElementById('form-title');
+        const formDescription = document.getElementById('form-description');
+        const canvasTitle = document.getElementById('canvas-title');
+        const canvasDescription = document.getElementById('canvas-description');
+        const formTheme = document.getElementById('form-theme');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            updateCanvasHeader();
+        });
+
+        // Set up all event listeners
+        function initializeEventListeners() {
+            // Element dragging
+            document.querySelectorAll('.element-item').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('click', () => addFormElement(item.dataset.type));
+            });
+
+            // Drop zone events
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            dropZone.addEventListener('drop', handleDrop);
+
+            // Form properties
+            formTitle.addEventListener('input', updateCanvasHeader);
+            formDescription.addEventListener('input', updateCanvasHeader);
+            formTheme.addEventListener('change', updateFormTheme);
+
+            // Button events
+            previewBtn.addEventListener('click', showPreview);
+            saveBtn.addEventListener('click', saveForm);
+            exportBtn.addEventListener('click', exportToPDF);
+            closeModal.addEventListener('click', () => previewModal.style.display = 'none');
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target === previewModal) {
+                    previewModal.style.display = 'none';
+                }
+            });
+        }
+
+        // Drag and drop functions
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.type);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        }
+
+        function handleDragLeave(e) {
+            if (!dropZone.contains(e.relatedTarget)) {
+                dropZone.classList.remove('active');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            
+            const elementType = e.dataTransfer.getData('text/plain');
+            addFormElement(elementType);
+            
+            // Remove dragging class from all elements
+            document.querySelectorAll('.element-item').forEach(item => {
+                item.classList.remove('dragging');
+            });
+        }
+
+        // Add a new form element to the canvas
+        function addFormElement(type) {
+            elementCounter++;
+            const elementId = `element-${elementCounter}`;
+            
+            // Create element data
+            const elementData = {
+                id: elementId,
+                type: type,
+                label: `${type.charAt(0).toUpperCase() + type.slice(1)} Field`,
+                required: false,
+                placeholder: '',
+                options: type === 'checkbox' || type === 'radio' || type === 'select' 
+                    ? ['Option 1', 'Option 2'] 
+                    : []
+            };
+            
+            formElements.push(elementData);
+            
+            // Create HTML for the element
+            const elementHTML = createFormElementHTML(elementData);
+            
+            // Insert before the drop zone
+            dropZone.insertAdjacentHTML('beforebegin', elementHTML);
+            
+            // Add event listeners to the new element
+            const newElement = document.getElementById(elementId);
+            newElement.addEventListener('click', (e) => {
+                if (!e.target.closest('.element-controls')) {
+                    selectElement(elementData);
+                }
+            });
+            
+            // Add event listeners to control buttons
+            const editBtn = newElement.querySelector('.edit-btn');
+            const deleteBtn = newElement.querySelector('.delete-btn');
+            
+            editBtn.addEventListener('click', () => {
+                // In a real app, this would open an edit dialog
+                alert(`Edit ${elementData.type} element`);
+            });
+            
+            deleteBtn.addEventListener('click', () => {
+                deleteElement(elementData.id);
+            });
+            
+            // Hide drop zone if it's the first element
+            if (formElements.length === 1) {
+                dropZone.style.display = 'none';
+            }
+            
+            // Select the new element
+            selectElement(elementData);
+        }
+
+        // Create HTML for a form element based on its type
+        function createFormElementHTML(element) {
+            let fieldHTML = '';
+            
+            switch(element.type) {
+                case 'text':
+                    fieldHTML = `<input type="text" class="form-input" placeholder="${element.placeholder || 'Enter text'}">`;
+                    break;
+                case 'textarea':
+                    fieldHTML = `<textarea class="form-input form-textarea" placeholder="${element.placeholder || 'Enter text'}"></textarea>`;
+                    break;
+                case 'checkbox':
+                    fieldHTML = `<div class="checkbox-group">`;
+                    element.options.forEach((option, index) => {
+                        fieldHTML += `
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="${element.id}-option-${index}" name="${element.id}">
+                                <label for="${element.id}-option-${index}">${option}</label>
+                            </div>
+                        `;
+                    });
+                    fieldHTML += `</div>`;
+                    break;
+                case 'radio':
+                    fieldHTML = `<div class="radio-group">`;
+                    element.options.forEach((option, index) => {
+                        fieldHTML += `
+                            <div class="radio-item">
+                                <input type="radio" id="${element.id}-option-${index}" name="${element.id}">
+                                <label for="${element.id}-option-${index}">${option}</label>
+                            </div>
+                        `;
+                    });
+                    fieldHTML += `</div>`;
+                    break;
+                case 'select':
+                    fieldHTML = `<select class="form-input">`;
+                    element.options.forEach(option => {
+                        fieldHTML += `<option>${option}</option>`;
+                    });
+                    fieldHTML += `</select>`;
+                    break;
+                case 'date':
+                    fieldHTML = `<input type="date" class="form-input">`;
+                    break;
+                case 'file':
+                    fieldHTML = `<input type="file" class="form-input">`;
+                    break;
+                case 'button':
+                    fieldHTML = `<button class="btn btn-primary">${element.label}</button>`;
+                    break;
+                case 'label':
+                    fieldHTML = `<p>${element.label}</p>`;
+                    break;
+            }
+            
+            return `
+                <div class="form-element" id="${element.id}">
+                    <div class="element-controls">
+                        <div class="control-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="control-btn delete-btn">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </div>
+                    <label class="form-label">${element.label} ${element.required ? '<span style="color:red">*</span>' : ''}</label>
+                    ${fieldHTML}
+                </div>
+            `;
+        }
+
+        // Select a form element and show its properties
+        function selectElement(element) {
+            // Deselect previously selected element
+            if (selectedElement) {
+                const prevElement = document.getElementById(selectedElement.id);
+                if (prevElement) prevElement.classList.remove('selected');
+            }
+            
+            // Select new element
+            selectedElement = element;
+            const currentElement = document.getElementById(element.id);
+            if (currentElement) currentElement.classList.add('selected');
+            
+            // Show properties in properties panel
+            showElementProperties(element);
+        }
+
+        // Show element properties in the properties panel
+        function showElementProperties(element) {
+            let propertiesHTML = `
+                <div class="property-control">
+                    <label for="element-label">Label</label>
+                    <input type="text" id="element-label" value="${element.label}">
+                </div>
+                <div class="property-control">
+                    <label for="element-required">
+                        <input type="checkbox" id="element-required" ${element.required ? 'checked' : ''}>
+                        Required Field
+                    </label>
+                </div>
+            `;
+            
+            if (element.type === 'text' || element.type === 'textarea') {
+                propertiesHTML += `
+                    <div class="property-control">
+                        <label for="element-placeholder">Placeholder</label>
+                        <input type="text" id="element-placeholder" value="${element.placeholder || ''}">
+                    </div>
+                `;
+            }
+            
+            if (element.type === 'checkbox' || element.type === 'radio' || element.type === 'select') {
+                propertiesHTML += `
+                    <div class="property-control">
+                        <label>Options</label>
+                        <div id="element-options">
+                `;
+                
+                element.options.forEach((option, index) => {
+                    propertiesHTML += `
+                        <div class="option-item" style="display: flex; margin-bottom: 5px;">
+                            <input type="text" value="${option}" class="option-input" data-index="${index}" style="flex: 1; margin-right: 5px;">
+                            <button class="btn delete-option" data-index="${index}" style="padding: 5px;">×</button>
+                        </div>
+                    `;
+                });
+                
+                propertiesHTML += `
+                        </div>
+                        <button id="add-option" class="btn" style="margin-top: 10px; width: 100%;">Add Option</button>
+                    </div>
+                `;
+            }
+            
+            propertiesHTML += `
+                <div class="property-control">
+                    <button id="delete-element" class="btn" style="background-color: #e74c3c; color: white; width: 100%;">
+                        Delete Element
+                    </button>
+                </div>
+            `;
+            
+            propertiesContent.innerHTML = propertiesHTML;
+            
+            // Add event listeners to property controls
+            document.getElementById('element-label').addEventListener('input', (e) => {
+                updateElementProperty('label', e.target.value);
+            });
+            
+            document.getElementById('element-required').addEventListener('change', (e) => {
+                updateElementProperty('required', e.target.checked);
+            });
+            
+            if (document.getElementById('element-placeholder')) {
+                document.getElementById('element-placeholder').addEventListener('input', (e) => {
+                    updateElementProperty('placeholder', e.target.value);
+                });
+            }
+            
+            // Options management
+            if (document.getElementById('add-option')) {
+                document.getElementById('add-option').addEventListener('click', addOption);
+                
+                document.querySelectorAll('.option-input').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        updateOption(parseInt(e.target.dataset.index), e.target.value);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-option').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        deleteOption(parseInt(e.target.dataset.index));
+                    });
+                });
+            }
+            
+            document.getElementById('delete-element').addEventListener('click', () => {
+                deleteElement(element.id);
+            });
+        }
+
+        // Update an element property
+        function updateElementProperty(property, value) {
+            if (!selectedElement) return;
+            
+            selectedElement[property] = value;
+            
+            // Update the element in the form
+            const element = document.getElementById(selectedElement.id);
+            if (element) {
+                if (property === 'label') {
+                    const label = element.querySelector('.form-label');
+                    if (label) {
+                        const requiredSpan = selectedElement.required ? '<span style="color:red">*</span>' : '';
+                        label.innerHTML = `${value} ${requiredSpan}`;
+                    }
+                } else if (property === 'required') {
+                    const label = element.querySelector('.form-label');
+                    if (label) {
+                        const requiredSpan = value ? '<span style="color:red">*</span>' : '';
+                        label.innerHTML = `${selectedElement.label} ${requiredSpan}`;
+                    }
+                } else if (property === 'placeholder') {
+                    const input = element.querySelector('.form-input');
+                    if (input) input.placeholder = value;
+                }
+            }
+        }
+
+        // Add a new option to checkbox/radio/select elements
+        function addOption() {
+            if (!selectedElement) return;
+            
+            selectedElement.options.push(`Option ${selectedElement.options.length + 1}`);
+            showElementProperties(selectedElement);
+            refreshElement(selectedElement);
+        }
+
+        // Update an option
+        function updateOption(index, value) {
+            if (!selectedElement) return;
+            
+            selectedElement.options[index] = value;
+            refreshElement(selectedElement);
+        }
+
+        // Delete an option
+        function deleteOption(index) {
+            if (!selectedElement || selectedElement.options.length <= 1) return;
+            
+            selectedElement.options.splice(index, 1);
+            showElementProperties(selectedElement);
+            refreshElement(selectedElement);
+        }
+
+        // Refresh an element in the form
+        function refreshElement(element) {
+            const elementDiv = document.getElementById(element.id);
+            if (elementDiv) {
+                const newHTML = createFormElementHTML(element);
+                elementDiv.outerHTML = newHTML;
+                
+                // Reattach event listeners
+                const newElement = document.getElementById(element.id);
+                newElement.addEventListener('click', (e) => {
+                    if (!e.target.closest('.element-controls')) {
+                        selectElement(element);
+                    }
+                });
+                
+                const editBtn = newElement.querySelector('.edit-btn');
+                const deleteBtn = newElement.querySelector('.delete-btn');
+                
+                editBtn.addEventListener('click', () => {
+                    alert(`Edit ${element.type} element`);
+                });
+                
+                deleteBtn.addEventListener('click', () => {
+                    deleteElement(element.id);
+                });
+                
+                // Reselect the element
+                selectElement(element);
+            }
+        }
+
+        // Delete an element from the form
+        function deleteElement(elementId) {
+            // Remove from DOM
+            const element = document.getElementById(elementId);
+            if (element) element.remove();
+            
+            // Remove from data
+            formElements = formElements.filter(el => el.id !== elementId);
+            
+            // Clear properties panel if this was the selected element
+            if (selectedElement && selectedElement.id === elementId) {
+                selectedElement = null;
+                propertiesContent.innerHTML = `
+                    <div class="no-selection">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Select an element to edit its properties</p>
+                    </div>
+                `;
+            }
+            
+            // Show drop zone if no elements left
+            if (formElements.length === 0) {
+                dropZone.style.display = 'flex';
+            }
+        }
+
+        // Update the canvas header with form title and description
+        function updateCanvasHeader() {
+            canvasTitle.textContent = formTitle.value || 'Untitled Form';
+            canvasDescription.textContent = formDescription.value || 'Add a description for your form';
+        }
+
+        // Update form theme
+        function updateFormTheme() {
+            const theme = formTheme.value;
+            document.body.className = '';
+            document.body.classList.add(`theme-${theme}`);
+        }
+
+        // Show form preview
+        function showPreview() {
+            let previewHTML = `
+                <div class="form-canvas">
+                    <div class="canvas-header">
+                        <h2>${formTitle.value || 'Untitled Form'}</h2>
+                        <p>${formDescription.value || 'Add a description for your form'}</p>
+                    </div>
+            `;
+            
+            formElements.forEach(element => {
+                previewHTML += createFormElementHTML(element);
+            });
+            
+            previewHTML += `</div>`;
+            previewContent.innerHTML = previewHTML;
+            previewModal.style.display = 'flex';
+        }
+
+        // Save form (in a real app, this would save to a server/database)
+        function saveForm() {
+            const formData = {
+                title: formTitle.value,
+                description: formDescription.value,
+                theme: formTheme.value,
+                elements: formElements
+            };
+            
+            // In a real app, you would send this to a server
+            localStorage.setItem('pdfFormData', JSON.stringify(formData));
+            alert('Form saved successfully!');
+        }
+
+        // Export to PDF (in a real app, this would generate an actual PDF)
+        function exportToPDF() {
+            if (formElements.length === 0) {
+                alert('Please add some form elements before exporting.');
+                return;
+            }
+            
+            // In a real app, you would use a PDF generation library like jsPDF
+            alert('In a real application, this would generate and download a PDF file with your form.');
+            
+            // Simulate PDF generation
+            console.log('Generating PDF with form data:', {
+                title: formTitle.value,
+                description: formDescription.value,
+                elements: formElements
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop PDF - Adjust PDF Page Margins</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/downloadjs@1.4.7"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .crop-interface {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            min-height: 600px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #ffd89b;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: #fff9f0;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: #fff4e6;
+            border-color: #19547b;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #ffd89b;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            background: #ffd89b;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #19547b;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .controls-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-group h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 8px;
+        }
+        
+        .margin-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .margin-control {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .margin-control label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .preset-sizes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .preset-btn {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .preset-btn:hover {
+            border-color: #ffd89b;
+            background: #fff9f0;
+        }
+        
+        .preset-btn.active {
+            border-color: #19547b;
+            background: #19547b;
+            color: white;
+        }
+        
+        .editor-area {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .preview-area {
+            flex: 1;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+            position: relative;
+            min-height: 500px;
+            overflow: hidden;
+        }
+        
+        .page-preview {
+            width: 400px;
+            height: 550px;
+            background: white;
+            border: 2px solid #333;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .crop-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #19547b;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: move;
+        }
+        
+        .crop-area {
+            position: absolute;
+            border: 2px dashed #19547b;
+            background: rgba(25, 84, 123, 0.1);
+        }
+        
+        .top-left { top: -6px; left: -6px; }
+        .top-right { top: -6px; right: -6px; }
+        .bottom-left { bottom: -6px; left: -6px; }
+        .bottom-right { bottom: -6px; right: -6px; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        
+        .status {
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .page-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .page-info {
+            text-align: center;
+            font-weight: 500;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Crop PDF</h1>
+            <p class="subtitle">Adjust PDF page margins and crop areas</p>
+        </header>
+        
+        <div class="crop-interface">
+            <div class="controls-panel">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">✂️</div>
+                    <h3>Select PDF to Crop</h3>
+                    <p>Choose a PDF file to adjust margins</p>
+                    <input type="file" id="fileInput" class="file-input" accept=".pdf">
+                    <button class="btn" onclick="document.getElementById('fileInput').click()">Select PDF File</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Page Margins</h3>
+                    <div class="margin-controls">
+                        <div class="margin-control">
+                            <label>Top Margin (mm):</label>
+                            <input type="number" class="form-control" id="topMargin" value="20" min="0" max="100">
+                        </div>
+                        <div class="margin-control">
+                            <label>Bottom Margin (mm):</label>
+                            <input type="number" class="form-control" id="bottomMargin" value="20" min="0" max="100">
+                        </div>
+                        <div class="margin-control">
+                            <label>Left Margin (mm):</label>
+                            <input type="number" class="form-control" id="leftMargin" value="20" min="0" max="100">
+                        </div>
+                        <div class="margin-control">
+                            <label>Right Margin (mm):</label>
+                            <input type="number" class="form-control" id="rightMargin" value="20" min="0" max="100">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Page Size Presets</h3>
+                    <div class="preset-sizes">
+                        <button class="preset-btn" data-size="a4">A4</button>
+                        <button class="preset-btn" data-size="letter">Letter</button>
+                        <button class="preset-btn" data-size="legal">Legal</button>
+                        <button class="preset-btn" data-size="a5">A5</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Crop Options</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="cropScope" value="current" checked> Current Page
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="cropScope" value="all"> All Pages
+                        </label>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="sameAllPages"> Apply same margins to all pages
+                    </label>
+                </div>
+            </div>
+            
+            <div class="editor-area">
+                <div class="preview-area" id="previewArea">
+                    <h4>PDF Crop Preview</h4>
+                    <p>Adjust margins using the controls or drag the crop handles</p>
+                    
+                    <div class="page-preview">
+                        <div class="crop-area" id="cropArea" style="top: 20px; left: 20px; right: 20px; bottom: 20px;">
+                            <div class="crop-handle top-left"></div>
+                            <div class="crop-handle top-right"></div>
+                            <div class="crop-handle bottom-left"></div>
+                            <div class="crop-handle bottom-right"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="page-controls">
+                        <button class="btn" id="prevPage">Previous</button>
+                        <div class="page-info">Page: <span id="currentPage">1</span> of <span id="totalPages">1</span></div>
+                        <button class="btn" id="nextPage">Next</button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="cropBtn">Apply Crop</button>
+                    <button class="btn" id="downloadBtn">Download Cropped PDF</button>
+                    <button class="btn" id="resetBtn">Reset Margins</button>
+                </div>
+                
+                <div id="statusArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let currentPage = 1;
+        let totalPages = 1;
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const previewArea = document.getElementById('previewArea');
+        const statusArea = document.getElementById('statusArea');
+        const cropBtn = document.getElementById('cropBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const currentPageSpan = document.getElementById('currentPage');
+        const totalPagesSpan = document.getElementById('totalPages');
+        const cropArea = document.getElementById('cropArea');
+
+        // File selection handling
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Preset size selection
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const size = this.getAttribute('data-size');
+                const margins = getPresetMargins(size);
+                
+                document.getElementById('topMargin').value = margins.top;
+                document.getElementById('bottomMargin').value = margins.bottom;
+                document.getElementById('leftMargin').value = margins.left;
+                document.getElementById('rightMargin').value = margins.right;
+                
+                updateCropPreview();
+            });
+        });
+
+        // Margin input changes
+        ['topMargin', 'bottomMargin', 'leftMargin', 'rightMargin'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateCropPreview);
+        });
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#fff4e6';
+            uploadArea.style.borderColor = '#19547b';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '#fff9f0';
+            uploadArea.style.borderColor = '#ffd89b';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#fff9f0';
+            uploadArea.style.borderColor = '#ffd89b';
+            
+            const files = Array.from(e.dataTransfer.files).filter(file => 
+                file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+            );
+            
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+                showStatus('Please select a PDF file.', 'error');
+                return;
+            }
+            
+            selectedFile = file;
+            uploadArea.style.display = 'none';
+            previewArea.style.display = 'block';
+            totalPages = 3; // Simulated page count
+            totalPagesSpan.textContent = totalPages;
+            showStatus('PDF loaded successfully! Adjust margins using controls or drag handles.', 'success');
+            updateCropPreview();
+        }
+
+        function getPresetMargins(size) {
+            const presets = {
+                'a4': { top: 25, bottom: 25, left: 20, right: 20 },
+                'letter': { top: 25, bottom: 25, left: 25, right: 25 },
+                'legal': { top: 25, bottom: 25, left: 25, right: 25 },
+                'a5': { top: 20, bottom: 20, left: 15, right: 15 }
+            };
+            return presets[size] || presets.a4;
+        }
+
+        function updateCropPreview() {
+            const top = parseInt(document.getElementById('topMargin').value) || 0;
+            const bottom = parseInt(document.getElementById('bottomMargin').value) || 0;
+            const left = parseInt(document.getElementById('leftMargin').value) || 0;
+            const right = parseInt(document.getElementById('rightMargin').value) || 0;
+            
+            // Update visual crop area
+            cropArea.style.top = top + 'px';
+            cropArea.style.bottom = bottom + 'px';
+            cropArea.style.left = left + 'px';
+            cropArea.style.right = right + 'px';
+        }
+
+        // Page navigation
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                currentPageSpan.textContent = currentPage;
+                showStatus(`Now editing page ${currentPage}`, 'info');
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                currentPageSpan.textContent = currentPage;
+                showStatus(`Now editing page ${currentPage}`, 'info');
+            }
+        });
+
+        // Crop functionality
+        cropBtn.addEventListener('click', async () => {
+            if (!selectedFile) {
+                showStatus('Please select a PDF file first.', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('Applying crop to PDF...', 'info');
+                
+                const arrayBuffer = await selectedFile.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                const pages = pdfDoc.getPages();
+                
+                const top = parseInt(document.getElementById('topMargin').value) || 0;
+                const bottom = parseInt(document.getElementById('bottomMargin').value) || 0;
+                const left = parseInt(document.getElementById('leftMargin').value) || 0;
+                const right = parseInt(document.getElementById('rightMargin').value) || 0;
+                const cropAll = document.querySelector('input[name="cropScope"]:checked').value === 'all';
+                
+                // Convert mm to PDF points (1 mm = 2.83465 points)
+                const mmToPoints = (mm) => mm * 2.83465;
+                
+                if (cropAll) {
+                    // Apply to all pages
+                    pages.forEach(page => {
+                        const { width, height } = page.getSize();
+                        page.setCropBox(
+                            mmToPoints(left),
+                            mmToPoints(bottom),
+                            width - mmToPoints(left + right),
+                            height - mmToPoints(top + bottom)
+                        );
+                    });
+                } else {
+                    // Apply to current page only
+                    const page = pages[currentPage - 1];
+                    const { width, height } = page.getSize();
+                    page.setCropBox(
+                        mmToPoints(left),
+                        mmToPoints(bottom),
+                        width - mmToPoints(left + right),
+                        height - mmToPoints(top + bottom)
+                    );
+                }
+                
+                const pdfBytes = await pdfDoc.save();
+                window.croppedPdfBytes = pdfBytes;
+                
+                showStatus('PDF cropped successfully! You can download the cropped version.', 'success');
+                
+            } catch (error) {
+                console.error('Crop error:', error);
+                showStatus('Error cropping PDF: ' + error.message, 'error');
+            }
+        });
+
+        // Download functionality
+        downloadBtn.addEventListener('click', () => {
+            if (!window.croppedPdfBytes) {
+                showStatus('Please apply crop first before downloading.', 'error');
+                return;
+            }
+            
+            const originalName = selectedFile.name.replace('.pdf', '');
+            const downloadName = `${originalName}-cropped.pdf`;
+            
+            download(window.croppedPdfBytes, downloadName, "application/pdf");
+            showStatus('Cropped PDF downloaded successfully!', 'success');
+        });
+
+        resetBtn.addEventListener('click', () => {
+            document.getElementById('topMargin').value = 20;
+            document.getElementById('bottomMargin').value = 20;
+            document.getElementById('leftMargin').value = 20;
+            document.getElementById('rightMargin').value = 20;
+            updateCropPreview();
+            showStatus('Margins reset to default values.', 'info');
+        });
+
+        function showStatus(message, type) {
+            statusArea.innerHTML = `<div class="status status-${type}">${message}</div>`;
+        }
+
+        // Initialize
+        showStatus('Select a PDF file to crop and adjust page margins.', 'info');
+        
+        // Make crop handles draggable
+        makeDraggable(cropArea);
+        
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            element.onmousedown = dragMouseDown;
+            
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+            
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                
+                // Update position
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+            
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+    </script>
+</body>
+</html>

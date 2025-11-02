@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Merger - Merge Multiple PDF Files</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/downloadjs@1.4.7"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: #eef1ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .file-list {
+            list-style: none;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-icon {
+            font-size: 1.2rem;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        
+        .status {
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .reorder-buttons {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .page-counter {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PDF Merger</h1>
+            <p class="subtitle">Merge multiple PDF files into one document</p>
+        </header>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📄</div>
+            <h3>Select PDF Files to Merge</h3>
+            <p>Choose multiple PDF files or drag & drop them here</p>
+            <input type="file" id="fileInput" class="file-input" accept=".pdf" multiple>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">Select PDF Files</button>
+        </div>
+        
+        <div id="fileSection" style="display: none;">
+            <h3>Selected Files:</h3>
+            <ul class="file-list" id="fileList">
+                <li>No files selected</li>
+            </ul>
+            
+            <div class="action-buttons">
+                <button class="btn btn-success" id="mergeBtn">Merge PDFs</button>
+                <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+                <button class="btn" id="addMoreBtn">Add More Files</button>
+            </div>
+        </div>
+        
+        <div id="statusArea"></div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileSection = document.getElementById('fileSection');
+        const fileList = document.getElementById('fileList');
+        const mergeBtn = document.getElementById('mergeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const addMoreBtn = document.getElementById('addMoreBtn');
+        const statusArea = document.getElementById('statusArea');
+
+        // File selection handling
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#eef1ff';
+            uploadArea.style.borderColor = '#764ba2';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '#f8f9ff';
+            uploadArea.style.borderColor = '#667eea';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8f9ff';
+            uploadArea.style.borderColor = '#667eea';
+            
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
+            if (files.length > 0) {
+                addFiles(files);
+            }
+        });
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            const pdfFiles = files.filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+            
+            if (pdfFiles.length === 0) {
+                showStatus('Please select PDF files only.', 'error');
+                return;
+            }
+            
+            selectedFiles = [...selectedFiles, ...pdfFiles];
+            updateFileList();
+            fileSection.style.display = 'block';
+            showStatus(`Added ${pdfFiles.length} PDF file(s). Total: ${selectedFiles.length} files.`, 'success');
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = '<li>No files selected</li>';
+                return;
+            }
+            
+            selectedFiles.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-icon">📄</span>
+                        <span>${file.name}</span>
+                        <span class="page-counter">${(file.size / 1024).toFixed(0)} KB</span>
+                    </div>
+                    <div class="file-actions">
+                        <div class="reorder-buttons">
+                            <button class="btn btn-sm btn-secondary" onclick="moveUp(${index})" ${index === 0 ? 'disabled' : ''}>↑</button>
+                            <button class="btn btn-sm btn-secondary" onclick="moveDown(${index})" ${index === selectedFiles.length - 1 ? 'disabled' : ''}>↓</button>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="removeFile(${index})">Remove</button>
+                    </div>
+                `;
+                fileList.appendChild(li);
+            });
+        }
+
+        function moveUp(index) {
+            if (index > 0) {
+                [selectedFiles[index], selectedFiles[index - 1]] = [selectedFiles[index - 1], selectedFiles[index]];
+                updateFileList();
+            }
+        }
+
+        function moveDown(index) {
+            if (index < selectedFiles.length - 1) {
+                [selectedFiles[index], selectedFiles[index + 1]] = [selectedFiles[index + 1], selectedFiles[index]];
+                updateFileList();
+            }
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            if (selectedFiles.length === 0) {
+                fileSection.style.display = 'none';
+            }
+        }
+
+        // Merge PDFs functionality
+        mergeBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) {
+                showStatus('Please select at least one PDF file.', 'error');
+                return;
+            }
+            
+            if (selectedFiles.length === 1) {
+                showStatus('Only one file selected. Please add more files to merge.', 'info');
+                return;
+            }
+            
+            showStatus('Merging PDF files...', 'info');
+            mergeBtn.disabled = true;
+            
+            try {
+                const mergedPdf = await PDFLib.PDFDocument.create();
+                
+                for (const file of selectedFiles) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                    const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    pages.forEach(page => mergedPdf.addPage(page));
+                }
+                
+                const mergedPdfBytes = await mergedPdf.save();
+                download(mergedPdfBytes, "merged-document.pdf", "application/pdf");
+                showStatus('PDF files merged successfully! Download started.', 'success');
+            } catch (error) {
+                console.error('Merge error:', error);
+                showStatus('Error merging PDF files: ' + error.message, 'error');
+            } finally {
+                mergeBtn.disabled = false;
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            updateFileList();
+            fileSection.style.display = 'none';
+            fileInput.value = '';
+            showStatus('All files cleared.', 'info');
+        });
+
+        addMoreBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        function showStatus(message, type) {
+            statusArea.innerHTML = `<div class="status status-${type}">${message}</div>`;
+        }
+
+        // Initialize
+        showStatus('Select multiple PDF files to merge them into one document.', 'info');
+    </script>
+</body>
+</html>

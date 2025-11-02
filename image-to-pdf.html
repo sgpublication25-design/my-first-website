@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to PDF Converter | Professional PDF Tools</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .progress-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .tool-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+        
+        .tool-card.completed {
+            border-left-color: #27ae60;
+            background: #f8fff9;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Image to PDF Specific Styles */
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px 0;
+        }
+        
+        .upload-area:hover {
+            background: #e9ecef;
+            border-color: #5a67d8;
+        }
+        
+        .upload-area.dragover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+        
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .preview-item {
+            position: relative;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .preview-info {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .conversion-options {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .option-group {
+            margin-bottom: 20px;
+        }
+        
+        .option-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .option-group select, 
+        .option-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+        
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #f0fff4;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .status-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+        
+        .status-info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ Image to PDF Converter</h1>
+            <p class="subtitle">Convert multiple images to a single PDF document</p>
+        </header>
+
+        <div class="dashboard">
+            <nav class="sidebar">
+                <h3>Navigation</h3>
+                <ul>
+                    <li><a href="dashboard.html">← Back to Dashboard</a></li>
+                    <li><a href="merge.html">PDF Merger</a></li>
+                    <li><a href="split.html">PDF Splitter</a></li>
+                    <li><a href="image-to-pdf.html" class="nav-active">Image to PDF</a></li>
+                </ul>
+            </nav>
+
+            <main class="content">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>Upload Your Images</h3>
+                    <p>Drag & drop your images here or click to browse</p>
+                    <p style="font-size: 14px; color: #718096; margin-top: 10px;">
+                        Supported formats: JPG, PNG, GIF, WebP | Max 20 images
+                    </p>
+                    <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+                    <button class="btn" onclick="document.getElementById('fileInput').click()" style="margin-top: 20px;">
+                        Select Images
+                    </button>
+                </div>
+
+                <div class="image-preview" id="imagePreview"></div>
+
+                <div class="conversion-options" id="conversionOptions" style="display: none;">
+                    <h3>📋 Conversion Settings</h3>
+                    
+                    <div class="option-group">
+                        <label for="pageSize">Page Size:</label>
+                        <select id="pageSize">
+                            <option value="a4">A4 (210 × 297 mm)</option>
+                            <option value="letter">Letter (8.5 × 11 in)</option>
+                            <option value="legal">Legal (8.5 × 14 in)</option>
+                            <option value="a3">A3 (297 × 420 mm)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="pageOrientation">Page Orientation:</label>
+                        <select id="pageOrientation">
+                            <option value="portrait">Portrait</option>
+                            <option value="landscape">Landscape</option>
+                            <option value="auto">Auto (Fit to image)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label for="pdfTitle">PDF Title:</label>
+                        <input type="text" id="pdfTitle" placeholder="Enter PDF document title" value="My Images PDF">
+                    </div>
+                    
+                    <div class="option-group">
+                        <label>Image Arrangement:</label>
+                        <select id="imageLayout">
+                            <option value="one-per-page">One image per page</option>
+                            <option value="fit-to-page">Fit image to page</option>
+                            <option value="auto-arrange">Auto arrange multiple images</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="convertBtn" style="display: none;">
+                        🚀 Convert to PDF
+                    </button>
+                    <button class="btn" id="resetBtn" style="display: none;">
+                        🔄 Clear All
+                    </button>
+                </div>
+
+                <div id="statusArea"></div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="image-to-pdf-script.js"></script>
+</body>
+</html>

@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Excel to PDF Converter</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .upload-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border-right: 1px solid #eee;
+        }
+        
+        .preview-section {
+            flex: 2;
+            min-width: 500px;
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--secondary-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background-color: #e8f4fc;
+            border-color: var(--primary-color);
+        }
+        
+        .upload-area i {
+            font-size: 48px;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .upload-area p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-convert {
+            background-color: var(--success-color);
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .btn-convert:hover {
+            background-color: #219653;
+        }
+        
+        .btn-convert:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .settings-panel {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .settings-group {
+            margin-bottom: 20px;
+        }
+        
+        .settings-group h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-item input, .radio-item input {
+            margin-right: 8px;
+        }
+        
+        .select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        select, input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .preview-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: white;
+            min-height: 400px;
+            max-height: 500px;
+            overflow: auto;
+            margin-bottom: 20px;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .preview-table th, .preview-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .preview-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .preview-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .file-info {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .file-info h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .file-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .file-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .file-detail:last-child {
+            border-bottom: none;
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .conversion-details {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .conversion-details h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .upload-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .file-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-excel"></i> Advanced Excel to PDF Converter</h1>
+            <p>Convert your Excel files to PDF while preserving all formatting, rows, and columns</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 class="section-title">Upload & Settings</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-file-upload"></i>
+                    <p>Drag & Drop your Excel file here</p>
+                    <p>or</p>
+                    <button class="btn" id="browseBtn"><i class="fas fa-folder-open"></i> Browse Files</button>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" hidden>
+                </div>
+                
+                <div class="settings-panel">
+                    <div class="settings-group">
+                        <h3>Page Settings</h3>
+                        <div class="select-group">
+                            <label for="pageSize">Page Size:</label>
+                            <select id="pageSize">
+                                <option value="A4">A4</option>
+                                <option value="Letter">Letter</option>
+                                <option value="Legal">Legal</option>
+                                <option value="A3">A3</option>
+                            </select>
+                            
+                            <label for="orientation">Orientation:</label>
+                            <select id="orientation">
+                                <option value="portrait">Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                            
+                            <label for="margin">Margin (inches):</label>
+                            <input type="text" id="margin" value="0.5">
+                        </div>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <h3>Content Options</h3>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="preserveFormatting" checked>
+                                <label for="preserveFormatting">Preserve Formatting</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="includeHeaders" checked>
+                                <label for="includeHeaders">Include Headers</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="repeatHeaders" checked>
+                                <label for="repeatHeaders">Repeat Headers on Each Page</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="autoFit" checked>
+                                <label for="autoFit">Auto-fit to Page Width</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <h3>Styling Options</h3>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="gridLines" checked>
+                                <label for="gridLines">Show Grid Lines</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="alternateRows">
+                                <label for="alternateRows">Alternate Row Colors</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="boldHeaders" checked>
+                                <label for="boldHeaders">Bold Headers</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <h3>Output Options</h3>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="outputAll" name="outputOption" checked>
+                                <label for="outputAll">All Sheets</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="outputActive" name="outputOption">
+                                <label for="outputActive">Active Sheet Only</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="outputCustom" name="outputOption">
+                                <label for="outputCustom">Custom Range</label>
+                            </div>
+                        </div>
+                        <input type="text" id="customRange" placeholder="e.g., A1:G20" style="margin-top: 10px; display: none;">
+                    </div>
+                </div>
+                
+                <button class="btn btn-convert" id="convertBtn" disabled>
+                    <i class="fas fa-file-pdf"></i> Convert to PDF
+                </button>
+                
+                <div class="status-message" id="statusMessage"></div>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="section-title">Preview</h2>
+                
+                <div class="preview-container" id="previewContainer">
+                    <p style="text-align: center; padding: 50px; color: #777;">
+                        <i class="fas fa-file-excel" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                        Upload an Excel file to see preview
+                    </p>
+                </div>
+                
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <h3>File Information</h3>
+                    <div class="file-details">
+                        <div class="file-detail">
+                            <span>File Name:</span>
+                            <span id="fileName">-</span>
+                        </div>
+                        <div class="file-detail">
+                            <span>File Size:</span>
+                            <span id="fileSize">-</span>
+                        </div>
+                        <div class="file-detail">
+                            <span>Sheets:</span>
+                            <span id="sheetCount">-</span>
+                        </div>
+                        <div class="file-detail">
+                            <span>Rows:</span>
+                            <span id="rowCount">-</span>
+                        </div>
+                        <div class="file-detail">
+                            <span>Columns:</span>
+                            <span id="columnCount">-</span>
+                        </div>
+                        <div class="file-detail">
+                            <span>Last Modified:</span>
+                            <span id="lastModified">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Advanced Excel to PDF Converter &copy; 2023 | Preserves all formatting, rows, and columns</p>
+        </footer>
+    </div>
+
+    <script>
+        // Enhanced Excel to PDF Converter Script
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.getElementById('browseBtn');
+            const uploadArea = document.getElementById('uploadArea');
+            const convertBtn = document.getElementById('convertBtn');
+            const previewContainer = document.getElementById('previewContainer');
+            const fileInfo = document.getElementById('fileInfo');
+            const statusMessage = document.getElementById('statusMessage');
+            const outputCustom = document.getElementById('outputCustom');
+            const customRange = document.getElementById('customRange');
+            
+            let currentFile = null;
+            let excelData = null;
+
+            // Initialize event listeners
+            initEventListeners();
+
+            function initEventListeners() {
+                // Browse button click event
+                browseBtn.addEventListener('click', function() {
+                    fileInput.click();
+                });
+                
+                // File input change event
+                fileInput.addEventListener('change', function(e) {
+                    if (e.target.files.length > 0) {
+                        handleFileSelection(e.target.files[0]);
+                    }
+                });
+                
+                // Drag and drop functionality
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.backgroundColor = '#e8f4fc';
+                    uploadArea.style.borderColor = '#3498db';
+                });
+                
+                uploadArea.addEventListener('dragleave', function() {
+                    uploadArea.style.backgroundColor = '#f8fafc';
+                    uploadArea.style.borderColor = '#3498db';
+                });
+                
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.backgroundColor = '#f8fafc';
+                    uploadArea.style.borderColor = '#3498db';
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        handleFileSelection(e.dataTransfer.files[0]);
+                    }
+                });
+                
+                // Custom range input visibility
+                outputCustom.addEventListener('change', function() {
+                    customRange.style.display = this.checked ? 'block' : 'none';
+                });
+                
+                // Convert button click event
+                convertBtn.addEventListener('click', function() {
+                    convertToPDF();
+                });
+            }
+
+            // Handle file selection and processing
+            async function handleFileSelection(file) {
+                if (!file.name.match(/\.(xlsx|xls)$/)) {
+                    showStatus('Please select a valid Excel file (.xlsx or .xls)', 'error');
+                    return;
+                }
+                
+                currentFile = file;
+                
+                try {
+                    showStatus('Processing Excel file...', 'info');
+                    
+                    // Get Excel file info from backend
+                    const fileInfo = await getExcelInfo(file);
+                    excelData = fileInfo;
+                    
+                    // Update UI
+                    updateFileInfo(file, fileInfo);
+                    updatePreview(fileInfo);
+                    
+                    // Enable convert button
+                    convertBtn.disabled = false;
+                    
+                    showStatus('Excel file processed successfully. Ready for conversion.', 'success');
+                } catch (error) {
+                    console.error('Error processing Excel file:', error);
+                    showStatus('Error processing Excel file: ' + error.message, 'error');
+                }
+            }
+
+            // Get Excel file information from backend
+            async function getExcelInfo(file) {
+                const formData = new FormData();
+                formData.append('excelFile', file);
+                
+                const response = await fetch('/api/get-excel-info', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to read Excel file');
+                }
+                
+                const result = await response.json();
+                return result.fileInfo;
+            }
+
+            // Update file information display
+            function updateFileInfo(file, data) {
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = data.fileSize;
+                document.getElementById('lastModified').textContent = new Date(file.lastModified).toLocaleString();
+                document.getElementById('sheetCount').textContent = data.sheetCount;
+                document.getElementById('rowCount').textContent = data.firstSheet.rows;
+                document.getElementById('columnCount').textContent = data.firstSheet.columns;
+                
+                fileInfo.style.display = 'block';
+            }
+
+            // Update preview table
+            function updatePreview(data) {
+                const sheetData = data.firstSheet;
+                
+                if (!sheetData.data || sheetData.data.length === 0) {
+                    previewContainer.innerHTML = '<p style="text-align: center; padding: 50px; color: #777;">No data found in Excel file</p>';
+                    return;
+                }
+                
+                const table = document.createElement('table');
+                table.className = 'preview-table';
+                
+                // Create table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                
+                // Use headers from backend or create generic headers
+                const headers = sheetData.columnAnalysis.map(col => col.header);
+                headers.forEach((header, index) => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    th.title = `Type: ${sheetData.columnAnalysis[index].dataType}`;
+                    headerRow.appendChild(th);
+                });
+                
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Create table body (show first 10 rows for preview)
+                const tbody = document.createElement('tbody');
+                const rowsToShow = Math.min(sheetData.data.length, 11); // Header + 10 rows
+                
+                for (let i = 0; i < rowsToShow; i++) {
+                    const row = document.createElement('tr');
+                    const rowData = sheetData.data[i] || [];
+                    
+                    // Ensure we have the same number of cells as headers
+                    for (let j = 0; j < headers.length; j++) {
+                        const cell = document.createElement('td');
+                        cell.textContent = rowData[j] !== undefined ? rowData[j] : '';
+                        
+                        // Add data type styling
+                        const dataType = sheetData.columnAnalysis[j]?.dataType;
+                        if (dataType === 'number') {
+                            cell.style.textAlign = 'right';
+                            cell.style.fontFamily = 'monospace';
+                        } else if (dataType === 'date') {
+                            cell.style.fontStyle = 'italic';
+                        }
+                        
+                        row.appendChild(cell);
+                    }
+                    
+                    tbody.appendChild(row);
+                }
+                
+                table.appendChild(tbody);
+                
+                // Clear and update preview container
+                previewContainer.innerHTML = '';
+                previewContainer.appendChild(table);
+                
+                // Add preview info
+                const info = document.createElement('div');
+                info.style.textAlign = 'center';
+                info.style.marginTop = '15px';
+                info.style.padding = '10px';
+                info.style.backgroundColor = '#f8f9fa';
+                info.style.borderRadius = '5px';
+                
+                info.innerHTML = `
+                    <p style="margin: 5px 0; font-style: italic; color: #555;">
+                        Preview of first ${rowsToShow} rows. Total rows: ${sheetData.rows}
+                    </p>
+                    <p style="margin: 5px 0; font-size: 0.9em; color: #777;">
+                        Data types detected: ${sheetData.columnAnalysis.filter(col => col.dataType !== 'text').length} columns
+                    </p>
+                `;
+                
+                previewContainer.appendChild(info);
+            }
+
+            // Convert Excel to PDF
+            async function convertToPDF() {
+                if (!currentFile || !excelData) {
+                    showStatus('Please select an Excel file first', 'error');
+                    return;
+                }
+                
+                try {
+                    showStatus('Converting to PDF...', 'info');
+                    convertBtn.disabled = true;
+                    convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+                    
+                    // Get conversion settings
+                    const settings = getConversionSettings();
+                    
+                    // Prepare form data
+                    const formData = new FormData();
+                    formData.append('excelFile', currentFile);
+                    formData.append('settings', JSON.stringify(settings));
+                    
+                    // Send conversion request
+                    const response = await fetch('/api/convert-excel-to-pdf', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Download the PDF
+                        await downloadPDF(result.filename);
+                        showStatus('PDF converted and downloaded successfully!', 'success');
+                        
+                        // Show conversion details
+                        showConversionDetails(result);
+                    } else {
+                        throw new Error(result.error || 'Conversion failed');
+                    }
+                    
+                } catch (error) {
+                    console.error('Conversion error:', error);
+                    showStatus('Conversion failed: ' + error.message, 'error');
+                } finally {
+                    convertBtn.disabled = false;
+                    convertBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Convert to PDF';
+                }
+            }
+
+            // Download converted PDF
+            async function downloadPDF(filename) {
+                try {
+                    const response = await fetch(`/api/download/${filename}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to download PDF');
+                    }
+                    
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = currentFile.name.replace(/\.(xlsx|xls)$/, '.pdf');
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                } catch (error) {
+                    throw new Error('Download failed: ' + error.message);
+                }
+            }
+
+            // Show conversion details
+            function showConversionDetails(result) {
+                const details = `
+                    <div class="conversion-details">
+                        <h4>Conversion Details:</h4>
+                        <div class="details-grid">
+                            <div><strong>Original Size:</strong> ${result.conversionDetails.originalSize}</div>
+                            <div><strong>PDF Size:</strong> ${result.conversionDetails.pdfSize}</div>
+                            <div><strong>Rows Processed:</strong> ${result.conversionDetails.rowsProcessed}</div>
+                            <div><strong>Columns:</strong> ${result.conversionDetails.columns}</div>
+                            <div><strong>Pages:</strong> ${result.conversionDetails.pages}</div>
+                            <div><strong>Data Types Detected:</strong> ${result.conversionDetails.dataTypesDetected}</div>
+                        </div>
+                    </div>
+                `;
+                
+                statusMessage.insertAdjacentHTML('afterend', details);
+            }
+
+            // Get conversion settings from UI
+            function getConversionSettings() {
+                const outputOption = document.querySelector('input[name="outputOption"]:checked').value;
+                
+                return {
+                    pageSize: document.getElementById('pageSize').value,
+                    orientation: document.getElementById('orientation').value,
+                    margin: parseFloat(document.getElementById('margin').value) || 0.5,
+                    fontSize: 8, // Default font size
+                    includeHeaders: document.getElementById('includeHeaders').checked,
+                    repeatHeaders: document.getElementById('repeatHeaders').checked,
+                    gridLines: document.getElementById('gridLines').checked,
+                    alternateRows: document.getElementById('alternateRows').checked,
+                    boldHeaders: document.getElementById('boldHeaders').checked,
+                    outputOption: outputOption,
+                    customRange: outputOption === 'custom' ? document.getElementById('customRange').value : '',
+                    title: `Converted from ${currentFile.name}`,
+                    footer: true,
+                    dataTypes: true // Enable data type detection
+                };
+            }
+
+            // Show status messages
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message';
+                
+                switch(type) {
+                    case 'success':
+                        statusMessage.classList.add('status-success');
+                        break;
+                    case 'error':
+                        statusMessage.classList.add('status-error');
+                        break;
+                    case 'info':
+                        statusMessage.classList.add('status-info');
+                        break;
+                }
+                
+                statusMessage.style.display = 'block';
+                
+                // Auto-hide success messages after 8 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 8000);
+                }
+            }
+
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        });
+    </script>
+</body>
+</html>
